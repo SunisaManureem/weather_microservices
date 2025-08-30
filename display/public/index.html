@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>Realtime weather dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      color-scheme: light dark;
+      /* ===== Palette (ปรับเฉพาะสี) ===== */
+      --bg-start:#eaf7ff;            /* ฟ้าพาสเทลสดใส */
+      --bg-end:#f3efff;              /* ไล่ม่วงอ่อน */
+      --ink:#0f172a; 
+      --muted:#64748b; 
+      --border:#e5e7eb;
+
+      /* แก้ว/แสง */
+      --glass:rgba(255,255,255,.75); 
+      --glass-strong:rgba(255,255,255,.86);
+      --shadow:0 20px 50px rgba(15,23,42,.08), 0 2px 10px rgba(15,23,42,.06);
+
+      /* แอ็กเซนต์ใหม่ (เขียวฟ้า) ให้ต่างจากเพื่อน */
+      --accent:#14b8a6;              /* teal-500 */
+      --accent-weak:#ccfbf1;         /* teal-100 */
+
+      /* สีตามวัน (เส้นขอบรายสัปดาห์) */
+      --sun:#ef4444;   /* อาทิตย์ แดง */
+      --mon:#f59e0b;   /* จันทร์ เหลือง/อำพัน */
+      --tue:#ec4899;   /* อังคาร ชมพู */
+      --wed:#22c55e;   /* พุธ เขียว */
+      --thu:#fb923c;   /* พฤหัส ส้ม */
+      --fri:#3b82f6;   /* ศุกร์ ฟ้า */
+      --sat:#8b5cf6;   /* เสาร์ ม่วง */
+
+      /* พื้นหลัง “ควันเทา” ของการ์ดค่าสถิติ (พื้นฐาน) */
+      --stat-bg:rgba(248,250,252,.92);   /* slate-50/90 */
+      --stat-border:#e2e8f0;             /* slate-200 */
+
+      /* สีพาสเทลเฉพาะการ์ดสถิติ (Light only) */
+      --humid-bg:#e0f2fe;   --humid-border:#bae6fd;  /* น้ำเงินฟ้าอ่อน */
+      --press-bg:#f3e8ff;   --press-border:#e9d5ff;  /* ม่วงอ่อน */
+      --wind-bg:#d1fae5;    --wind-border:#a7f3d0;   /* เขียวมิ้นต์ */
+      
+      --radius:18px;
+    }
+
+    /* ========= Night theme (เฉพาะสี) ========= */
+    html[data-theme="night"]{
+      --bg-start:#0b1220;
+      --bg-end:#111827;
+      --ink:#e5e7eb;
+      --muted:#94a3b8;
+      --border:#1f2937;
+
+      --glass:rgba(17,24,39,.6);
+      --glass-strong:rgba(17,24,39,.72);
+      --shadow:0 20px 50px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.25);
+
+      --accent:#38bdf8;
+      --accent-weak:rgba(56,189,248,.14);
+
+      /* ควันเทาโทนกลางคืน (ใหม่) */
+      --stat-bg:rgba(31,41,55,.75);  /* slate-800/75 */
+      --stat-border:#334155;         /* slate-700 */
+    }
+    html[data-theme="night"] .card h2{ color:#cbd5e1 }
+    html[data-theme="night"] .stat h3{ color:#9ca3af }
+
+    *{ box-sizing:border-box }
+    *, *::before, *::after{ min-width:0 }
+
+    html, body{
+      max-width:100%;
+      overflow-x:hidden;
+      height:auto;
+      min-height:100%;
+    }
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Thai", Arial, sans-serif;
+      margin:0; line-height:1.5; color:var(--ink);
+      background:
+        radial-gradient(900px 420px at 12% 8%, rgba(147,197,253,.35), transparent 60%),
+        radial-gradient(700px 360px at 90% 20%, rgba(196,181,253,.30), transparent 60%),
+        linear-gradient(180deg, var(--bg-start), var(--bg-end));
+      min-height:100svh;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .sky{
+      position:fixed; inset:0; pointer-events:none; opacity:.30; filter:blur(2px);
+      background:
+        radial-gradient(140px 140px at 12% 18%, #fff, transparent 60%),
+        radial-gradient(180px 140px at 22% 15%, #fff, transparent 60%),
+        radial-gradient(220px 160px at 85% 18%, #fff, transparent 60%);
+      z-index:-1;
+    }
+
+    .page{
+      width:100%;
+      max-width:1200px;
+      margin: clamp(16px, 3vw, 28px) auto clamp(24px, 4vw, 48px);
+      padding: 0 12px;
+    }
+
+    .topbar{
+      width:100%;
+      display:flex; align-items:center; gap:clamp(8px,1.8vw,14px); flex-wrap:wrap;
+      padding: clamp(10px, 1.8vw, 14px) clamp(12px, 2.2vw, 18px);
+      border:1px solid var(--border); border-radius:calc(var(--radius) + 6px);
+      background:var(--glass-strong); backdrop-filter:saturate(140%) blur(8px);
+      box-shadow:var(--shadow);
+    }
+    h1{font-size:clamp(1.2rem, 3.2vw, 1.8rem); margin:0; letter-spacing:.3px; font-weight:800}
+    #curLoc{opacity:.85}
+    .live{display:inline-flex; align-items:center; gap:8px; font-weight:800; color:#16a34a; margin-left:4px}
+    .dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 6px rgba(34,197,94,.15);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%{transform:scale(.9);opacity:.6}50%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.6}}
+    #updated{color:var(--muted);font-size:.95rem}
+    .controls{display:flex; gap:10px; align-items:center; margin-left:auto; flex-wrap:wrap}
+    .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:#fff}
+    .seg button{padding:6px 12px;border:0;background:transparent;cursor:pointer;font-weight:800;color:#334155; white-space:nowrap}
+    .seg button.active{background:var(--accent-weak); color:var(--accent)}
+    .pill{border:1px solid var(--border); border-radius:999px; padding:8px 14px; background:#fff; cursor:pointer; font-weight:700}
+    select{padding:8px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:600; max-width:100%}
+
+    .grid{ display:grid; gap:22px; grid-template-columns: 1fr; width:100% }
+    section, .grid, .big{ min-width:0 }
+
+    .card, .stat{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:var(--glass);
+      backdrop-filter:saturate(160%) blur(10px);
+      box-shadow:var(--shadow);
+      width:100%;
+    }
+    .card{ padding: clamp(12px, 2.2vw, 20px); }
+    .card h2{ margin:0 0 10px 0; font-size:clamp(1rem, 2.6vw, 1.08rem); color:#334155; display:flex; align-items:center; gap:8px; letter-spacing:.2px }
+
+    .big{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin:10px 0 16px; }
+    .temp{ font-size:clamp(2.2rem, 6.2vw, 3.8rem); font-weight:900; letter-spacing:.5px }
+    .icon{ font-size:clamp(1.6rem, 4.6vw, 2.3rem); filter:drop-shadow(0 6px 10px rgba(0,0,0,.08)) }
+
+    .meta{ color:#334155; display:grid; gap:6px }
+    .meta small{ color:var(--muted) }
+
+    /* ===== “การ์ดสถิติ” ===== */
+    .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:14px }
+    .stat{
+      background:var(--stat-bg);            /* พื้นฐาน */
+      border-color:var(--stat-border);
+      box-shadow:0 10px 24px rgba(0,0,0,.08);
+      padding:14px; transition:transform .15s ease, box-shadow .15s ease
+    }
+    /* เติมสีในโหมด Light เฉพาะสามใบนี้ (ความชื้น/กดอากาศ/ลม) */
+    .stats .stat:nth-child(1){
+      background:linear-gradient(180deg, var(--humid-bg), rgba(255,255,255,.86));
+      border-color:var(--humid-border);
+    }
+    .stats .stat:nth-child(2){
+      background:linear-gradient(180deg, var(--press-bg), rgba(255,255,255,.86));
+      border-color:var(--press-border);
+    }
+    .stats .stat:nth-child(3){
+      background:linear-gradient(180deg, var(--wind-bg), rgba(255,255,255,.86));
+      border-color:var(--wind-border);
+    }
+    /* ในโหมด Night ให้กลับเป็นควันเทา (อ่านสบาย) */
+    html[data-theme="night"] .stats .stat:nth-child(1),
+    html[data-theme="night"] .stats .stat:nth-child(2),
+    html[data-theme="night"] .stats .stat:nth-child(3){
+      background:var(--stat-bg);
+      border-color:var(--stat-border);
+    }
+
+    .stat:hover{ transform:translateY(-2px); box-shadow:0 18px 36px rgba(0,0,0,.12) }
+    .stat h3{ margin:0; font-size:.95rem; color:#6b7280 }
+    .stat .v{ font-size:clamp(1.2rem, 3.2vw, 1.55rem); font-weight:900; margin-top:8px }
+
+    .hourlyRow{
+      display:flex; gap:14px; overflow:auto; padding:6px 2px; scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior-x: contain;
+    }
+    .hourlyRow::-webkit-scrollbar{ height:8px }
+    .hourlyRow::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:999px }
+    .hcard{
+      flex:0 0 clamp(90px, 26vw, 108px);
+      border:1px solid var(--stat-border);
+      background:var(--stat-bg);
+      border-radius:14px; padding:clamp(10px, 2.2vw, 12px);
+      box-shadow:var(--shadow); scroll-snap-align:start; transition:transform .15s ease, box-shadow .15s ease
+    }
+    .hcard:hover{ transform:translateY(-3px); box-shadow:0 16px 36px rgba(15,23,42,.12) }
+    .hcard .t{ font-weight:900; color:var(--ink); font-size:.92rem }
+    .hcard .i{ font-size:1.25rem; margin:8px 0 }
+    .hcard .v{ font-weight:900; font-size:1.02rem }
+
+    .weekRow{ display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 42vw, 180px), 1fr)) }
+    .dchip{
+      padding:12px; border-radius:16px; background:var(--stat-bg); border:2px solid var(--stat-border);
+      box-shadow:var(--shadow); transition:transform .15s ease, box-shadow .15s ease
+    }
+    .dchip:hover{ transform:translateY(-3px); box-shadow:0 18px 40px rgba(15,23,42,.12) }
+    .dchip .head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; color:var(--ink) }
+    .dchip .range{ font-weight:900; font-size:1.02rem }
+
+    /* สีกรอบตามวัน */
+    .sun{ border-color:var(--sun) }
+    .mon{ border-color:var(--mon) }
+    .tue{ border-color:var(--tue) }
+    .wed{ border-color:var(--wed) }
+    .thu{ border-color:var(--thu) }
+    .fri{ border-color:var(--fri) }
+    .sat{ border-color:var(--sat) }
+
+    section .card + .card{ margin-top:14px }
+
+    @media (max-width: 1024px){
+      .stats{ gap:12px; }
+    }
+    @media (max-width: 768px){
+      .topbar{ flex-direction: column; align-items: stretch; gap:10px; }
+      .controls{ margin-left:0; width:100%; gap:8px; flex-wrap:wrap }
+      .stats{ grid-template-columns: repeat(2, 1fr); }
+      .weekRow{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 480px){
+      .stats{ grid-template-columns: 1fr; }
+      .hcard{ flex-basis: clamp(88px, 38vw, 100px); }
+      .weekRow{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+      .dchip{ padding:10px; border-radius:14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sky"></div>
+
+  <div class="page">
+    <div class="topbar">
+      <h1>สภาพอากาศ <span id="curLoc"></span></h1>
+      <div class="live"><span class="dot"></span> LIVE</div>
+      <div id="updated" class="muted">Loading...</div>
+      <div class="controls">
+        <div class="seg">
+          <button id="btnC" class="active">°C</button>
+          <button id="btnF">°F</button>
+        </div>
+
+        <!-- สวิตช์ธีม -->
+        <div class="seg mode">
+          <button id="lightBtn" class="active">Light</button>
+          <button id="nightBtn">Night</button>
+        </div>
+
+        <select id="autoSel">
+          <option value="0">Auto: Off</option>
+          <option value="30">Every 30s</option>
+          <option value="60" selected>Every 60s</option>
+          <option value="300">Every 5 min</option>
+        </select>
+        <button id="refreshBtn" class="pill">Refresh</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section>
+        <div class="card" aria-live="polite">
+          <h2>สภาพอากาศปัจจุบัน</h2>
+          <div class="big">
+            <div class="temp"><span id="curTemp">—</span></div>
+            <div class="icon" id="wxIcon">⛅</div>
+          </div>
+          <div class="meta">
+            <div><strong>แหล่งข้อมูล:</strong> <span id="curSrc">—</span></div>
+            <small>Note: Times shown are your local timezone</small>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <h3>ความชื้น</h3>
+              <div class="v" id="curHum">—</div>
+            </div>
+            <div class="stat">
+              <h3>ความกดอากาศ</h3>
+              <div class="v" id="curPres">—</div>
+            </div>
+            <div class="stat">
+              <h3>ความเร็วลม</h3>
+              <div class="v" id="curWindBlock">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>รายชั่วโมง</h2>
+          <div id="hourlyRow" class="hourlyRow"><div class="muted">—</div></div>
+        </div>
+
+        <div class="card">
+          <h2>รายสัปดาห์</h2>
+          <div id="weekRow" class="weekRow"><div class="muted">—</div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    /* ====== Utilities ====== */
+    const CtoF = c => (c*9/5)+32;
+    const fmt  = v => isFinite(v) ? (Math.round(v*10)/10).toFixed(1) : '—';
+
+    /* เพิ่ม location ลง state เพื่อให้แสดงคงที่ */
+    const state = { unit:'C', records:[], hourly:[], daily:[], location:'' };
+
+    /* English date+time in Asia/Bangkok, live seconds */
+    const enDT = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: true
+    });
+    function startClock(){
+      const el = document.getElementById('updated');
+      function tick(){ el.textContent = 'Updated: ' + enDT.format(new Date()); }
+      tick();
+      if (window._clock) clearInterval(window._clock);
+      window._clock = setInterval(tick, 1000);
+    }
+
+    function iconEmoji(kind){
+      if (typeof kind === 'string') {
+        const k = kind.toLowerCase();
+        if (k.includes('rain')) return '🌧️';
+        if (k.includes('thunder')) return '⛈️';
+        if (k.includes('cloud') || k.includes('partly')) return '⛅';
+        if (k.includes('clear') || k.includes('sun')) return '☀️';
+        if (k.includes('snow')) return '🌨️';
+        if (k.includes('wind')) return '💨';
+        return '⛅';
+      }
+      const n = Number(kind);
+      if (Number.isFinite(n)) {
+        if (n === 0) return '☀️';
+        if ([1,2,3,45,48].includes(n)) return '⛅';
+        if ([51,53,55,61,63,65,80,81,82].includes(n)) return '🌧️';
+        if ([71,73,75,77,85,86].includes(n)) return '🌨️';
+        if ([95,96,99].includes(n)) return '⛈️';
+        return '⛅';
+      }
+      return '⛅';
+    }
+
+    const curTempEl=document.getElementById('curTemp'),
+          curSrcEl=document.getElementById('curSrc'),
+          curHumEl=document.getElementById('curHum'),
+          curPresEl=document.getElementById('curPres'),
+          curWindBlockEl=document.getElementById('curWindBlock'),
+          wxIconEl=document.getElementById('wxIcon'),
+          curLocEl=document.getElementById('curLoc');
+    const hourlyRow=document.getElementById('hourlyRow');
+    const weekRow=document.getElementById('weekRow');
+
+    function renderCurrent(){
+      const latest = state.records[state.records.length-1]; if(!latest) return;
+      const t = state.unit==='C' ? latest.temp : CtoF(latest.temp);
+      curTempEl.textContent = fmt(t) + " °" + state.unit;
+      curSrcEl.textContent  = latest.source || '—';
+      curHumEl.textContent  = latest.humidity != null ? `${fmt(latest.humidity)} %` : '—';
+      curPresEl.textContent = latest.pressure != null ? `${fmt(latest.pressure)} hPa` : '—';
+      curWindBlockEl.textContent = latest.wind != null ? `${fmt(latest.wind)} km/h` : '—';
+      wxIconEl.textContent  = iconEmoji(latest.icon);
+      /* ใช้ state.location เสมอ ไม่ให้ชื่อเมืองหาย */
+      curLocEl.textContent  = state.location || '';
+    }
+
+    const hh = ts => { const d=new Date(ts); const h=d.getHours(); const ampm=h<12?'AM':'PM'; const h12=(h%12)||12; return `${h12} ${ampm}`; };
+    const dayLabel = dstr => { const d=new Date(dstr.includes('T')? dstr : `${dstr}T00:00:00`); return d.toLocaleDateString(undefined,{weekday:'short',day:'2-digit',month:'short'}); };
+
+    /* แปลงวันที่ -> class สีตามวัน */
+    function weekdayClass(dateStr){
+      const d = new Date(dateStr.includes('T')? dateStr : `${dateStr}T00:00:00`);
+      const w = d.getDay(); // 0=Sun ... 6=Sat
+      return ['sun','mon','tue','wed','thu','fri','sat'][w];
+    }
+
+    function renderHourly(){
+      hourlyRow.innerHTML='';
+      if(!state.hourly.length){hourlyRow.innerHTML='<div class="muted">—</div>'; return;}
+      state.hourly.slice(0,12).forEach(h=>{
+        const t = state.unit==='C' ? h.temp : CtoF(h.temp);
+        const div=document.createElement('div');
+        div.className='hcard';
+        div.innerHTML=`<div class="t">${hh(h.time)}</div>
+                       <div class="i">${iconEmoji(h.icon)}</div>
+                       <div class="v">${fmt(t)}°</div>`;
+        hourlyRow.appendChild(div);
+      });
+    }
+
+    function renderWeekly(){
+      weekRow.innerHTML='';
+      if(!state.daily.length){weekRow.innerHTML='<div class="muted">—</div>'; return;}
+      state.daily.slice(0,7).forEach(d=>{
+        const min = state.unit==='C' ? d.min : CtoF(d.min);
+        const max = state.unit==='C' ? d.max : CtoF(d.max);
+        const chip=document.createElement('div');
+        chip.className=`dchip ${weekdayClass(d.date)}`;
+        chip.innerHTML=`<div class="head"><span>${dayLabel(d.date)}</span><span style="font-size:1.2rem">${iconEmoji(d.icon)}</span></div>
+                        <div class="range">${fmt(min)}° ~ ${fmt(max)}°</div>`;
+        weekRow.appendChild(chip);
+      });
+    }
+
+    function pushRecord(d){
+      let ts=d.time ?? d.timestamp;
+      if(typeof ts==='number'){ if(ts<1e12) ts*=1000; ts=new Date(ts).toISOString(); }
+      /* อัปเดต location ใน state เฉพาะเมื่อ payload มีค่า */
+      if (d.location) state.location = d.location;
+      state.records.push({
+        time:ts, temp:Number(d.temp), wind:Number(d.wind), source:d.source||'',
+        humidity:d.humidity!=null?Number(d.humidity):null, pressure:d.pressure!=null?Number(d.pressure):null,
+        icon:d.icon, location:d.location||''
+      });
+      while(state.records.length>60) state.records.shift();
+    }
+
+    async function loadCurrent(){
+      const r=await fetch('/api/current',{cache:'no-store'}); if(!r.ok) throw new Error();
+      const data=await r.json();
+      /* เก็บ location ถ้ามี แล้วค่อยรีเซ็ต records */
+      if (data.location) state.location = data.location;
+      state.records=[]; 
+      pushRecord(data);
+      renderCurrent();
+    }
+
+    async function loadForecast(){
+      const r=await fetch('/api/forecast',{cache:'no-store'}); if(!r.ok) throw new Error();
+      const f=await r.json();
+      /* ถ้า forecast บอก location ก็จำไว้ด้วย กันชื่อเมืองว่าง */
+      if (f.location) state.location = f.location;
+      state.hourly=(f.hourly||[]).map(x=>({time:x.time,temp:Number(x.temp),icon:x.icon}));
+      state.daily=(f.daily||[]).map(x=>({date:x.date,min:Number(x.min),max:Number(x.max),icon:x.icon}));
+      renderHourly(); renderWeekly();
+      /* เผื่อครั้งแรกยังไม่ได้ current ให้โชว์ชื่อเมืองจาก forecast ทันที */
+      renderCurrent();
+    }
+
+    async function withRetry(fn, tries=2, delay=300){
+      let err; for(let i=0;i<tries;i++){ try{return await fn();} catch(e){err=e; await new Promise(r=>setTimeout(r,delay*(i+1)));} }
+      throw err;
+    }
+
+    function connectSSE(){
+      const es=new EventSource('/events');
+      es.onmessage=ev=>{ try{ const d=JSON.parse(ev.data); if(!d) return; pushRecord(d); renderCurrent(); }catch{} };
+      es.addEventListener('hello',()=>{loadForecast().catch(()=>{})});
+      es.onopen=()=>{loadForecast().catch(()=>{})};
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click',()=>{ loadCurrent().catch(()=>{}); loadForecast().catch(()=>{}); });
+    document.getElementById('autoSel').addEventListener('change',e=>{
+      const sec=Number(e.target.value); if(window._pullTimer) clearInterval(window._pullTimer);
+      if(sec>0) window._pullTimer=setInterval(()=>{ loadCurrent().catch(()=>{}); loadForecast().catch(()=>{}) },sec*1000);
+    });
+    document.getElementById('btnC').addEventListener('click',()=>{ document.getElementById('btnC').classList.add('active'); document.getElementById('btnF').classList.remove('active'); state.unit='C'; renderCurrent(); renderHourly(); renderWeekly(); });
+    document.getElementById('btnF').addEventListener('click',()=>{ document.getElementById('btnF').classList.add('active'); document.getElementById('btnC').classList.remove('active'); state.unit='F'; renderCurrent(); renderHourly(); renderWeekly(); });
+
+    /* ==== Theme toggle (Light / Night) – สีเท่านั้น ==== */
+    const THEME_KEY = 'theme';
+    function applyTheme(t){
+      const root = document.documentElement;
+      root.setAttribute('data-theme', t);
+      document.getElementById('lightBtn')?.classList.toggle('active', t==='light');
+      document.getElementById('nightBtn')?.classList.toggle('active', t==='night');
+      try{ localStorage.setItem(THEME_KEY, t); }catch{}
+    }
+    (function initTheme(){
+      const saved = (()=>{ try{return localStorage.getItem(THEME_KEY);}catch{return null;} })();
+      const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(saved || (systemDark ? 'night' : 'light'));
+      document.getElementById('lightBtn')?.addEventListener('click', ()=>applyTheme('light'));
+      document.getElementById('nightBtn')?.addEventListener('click', ()=>applyTheme('night'));
+    })();
+
+    (async()=>{
+      startClock();
+      await withRetry(loadCurrent,2,400).catch(()=>{});
+      await withRetry(loadForecast,2,500).catch(()=>{});
+      connectSSE();
+      window._pullTimer=setInterval(()=>{ loadCurrent().catch(()=>{}); loadForecast().catch(()=>{}) },60*1000);
+    })();
+  </script>
+</body>
+</html>

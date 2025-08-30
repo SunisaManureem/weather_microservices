@@ -1,0 +1,15 @@
+# ไม่ต้อง copy node_modules เพราะจะติดตั้งใหม่ใน container
+node_modules
+npm-debug.log
+yarn-error.log
+
+# ไฟล์ระบบ
+.DS_Store
+.env
+*.log
+
+# git / editor
+.git
+.gitignore
+.vscode
+.idea

@@ -1,0 +1,43 @@
+services:
+  crud:
+    build: ./crud
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      DB_NAME: ${DB_NAME}
+      NODE_OPTIONS: --dns-result-order=ipv4first
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  fetcher:
+    build: ./fetcher
+    depends_on:
+      - crud
+    environment:
+      CRUD_URL: ${CRUD_URL}
+      LAT: ${LAT}
+      LON: ${LON}
+      TZ: Asia/Bangkok
+      SCHEDULE: ${SCHEDULE}
+      NODE_OPTIONS: --dns-result-order=ipv4first
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    restart: unless-stopped
+
+  display:
+    build: ./display
+    depends_on:
+      - crud
+    environment:
+      CRUD_BASE: http://crud:3000
+      LAT: ${LAT}
+      LON: ${LON}
+      TZ: Asia/Bangkok
+      LOCATION: "Bangkok, TH"
+      NODE_OPTIONS: --dns-result-order=ipv4first
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes: {}

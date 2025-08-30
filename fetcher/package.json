@@ -1,0 +1,13 @@
+{
+  "name": "fetcher",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "node-cron": "^3.0.2",
+    "dotenv": "^16.0.3"
+  }
+}
