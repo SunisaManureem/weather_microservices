@@ -1,0 +1,35 @@
+services:
+  # =========================
+  # 1) CRUD Service (API + MongoDB)
+  # =========================
+  - type: web
+    name: weather-crud
+    env: docker
+    dockerfilePath: ./crud/Dockerfile
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: MONGO_URI
+        sync: false       # กรอกค่าใน Render เอง
+      - key: DB_NAME
+        sync: false       # กรอกค่าใน Render เอง
+
+  # =========================
+  # 2) Fetcher Service (Worker ดึงข้อมูลจาก Open-Meteo)
+  # =========================
+  - type: worker
+    name: weather-fetcher
+    env: docker
+    dockerfilePath: ./fetcher/Dockerfile
+    plan: free
+    autoDeploy: true
+
+  # =========================
+  # 3) Display Service (Frontend Dashboard)
+  # =========================
+  - type: web
+    name: weather-display
+    env: docker
+    dockerfilePath: ./display/Dockerfile
+    plan: free
+    autoDeploy: true
