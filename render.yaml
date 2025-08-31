@@ -1,35 +1,46 @@
 services:
-  # =========================
-  # 1) CRUD Service (API + MongoDB)
-  # =========================
+  # 1) CRUD API (Node + Express)
   - type: web
     name: weather-crud
-    env: docker
-    dockerfilePath: ./crud/Dockerfile
+    env: node
     plan: free
+    rootDir: crud
+    buildCommand: npm ci --omit=dev
+    startCommand: node index.js
     autoDeploy: true
+    healthCheckPath: /health
     envVars:
       - key: MONGO_URI
-        sync: false       # กรอกค่าใน Render เอง
+        sync: false   # ใส่ค่าในหน้า Blueprint ตอน Deploy
       - key: DB_NAME
-        sync: false       # กรอกค่าใน Render เอง
+        sync: false   # ใส่ค่าในหน้า Blueprint ตอน Deploy
+      # (ถ้ามีค่าอื่นใน crud/.env.example ให้เพิ่ม key ตรงนี้ได้)
 
-  # =========================
-  # 2) Fetcher Service (Worker ดึงข้อมูลจาก Open-Meteo)
-  # =========================
-  - type: worker
-    name: weather-fetcher
-    env: docker
-    dockerfilePath: ./fetcher/Dockerfile
-    plan: free
-    autoDeploy: true
-
-  # =========================
-  # 3) Display Service (Frontend Dashboard)
-  # =========================
+  # 2) Display (หน้า UI + proxy ไป CRUD)
   - type: web
     name: weather-display
-    env: docker
-    dockerfilePath: ./display/Dockerfile
+    env: node
     plan: free
+    rootDir: display
+    buildCommand: npm ci --omit=dev
+    startCommand: node index.js
     autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      # ตัวอย่าง: ถ้า display ต้องรู้ URL ของ CRUD ให้ประกาศไว้เป็นตัวแปรนี้
+      - key: CRUD_BASE_URL
+        sync: false   # หลัง deploy ครั้งแรก ให้ใส่เป็น https://<weather-crud ของคุณ>.onrender.com
+
+  # 3) Fetcher เป็น Cron Job (แทน Background Worker)
+  - type: cron
+    name: weather-fetcher-cron
+    plan: free
+    rootDir: fetcher
+    buildCommand: npm ci --omit=dev
+    schedule: "*/5 * * * *"   # ทุก 5 นาที
+    command: node index.js
+    envVars:
+      # ให้ fetcher โพสต์เข้า CRUD ผ่าน URL สาธารณะ
+      - key: CRUD_BASE_URL
+        sync: false   # ใส่เป็น URL เดียวกับด้านบน
+      # ถ้า fetcher ใช้คีย์อื่น (เช่น พิกัด เมือง ฯลฯ) เพิ่มได้ที่นี่
