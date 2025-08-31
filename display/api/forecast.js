@@ -1,3 +1,4 @@
+/*
 // /display/api/forecast.js
 const LAT = process.env.LAT || "13.7563";
 const LON = process.env.LON || "100.5018";
@@ -36,3 +37,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "fetch-failed" });
   }
 }
+*/
