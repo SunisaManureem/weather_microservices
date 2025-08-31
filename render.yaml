@@ -5,42 +5,35 @@ services:
     env: node
     plan: free
     rootDir: crud
-    buildCommand: npm ci --omit=dev
+    buildCommand: npm install
     startCommand: node index.js
     autoDeploy: true
     healthCheckPath: /health
     envVars:
       - key: MONGO_URI
-        sync: false   # ใส่ค่าในหน้า Blueprint ตอน Deploy
+        sync: false
       - key: DB_NAME
-        sync: false   # ใส่ค่าในหน้า Blueprint ตอน Deploy
-      # (ถ้ามีค่าอื่นใน crud/.env.example ให้เพิ่ม key ตรงนี้ได้)
+        sync: false
 
-  # 2) Display (หน้า UI + proxy ไป CRUD)
+  # 2) Fetcher (Cron Job → เรียก crud API)
+  - type: cron
+    name: weather-fetcher
+    env: node
+    plan: free
+    schedule: "*/30 * * * *" # ทุก 30 นาที
+    rootDir: fetcher
+    buildCommand: npm install
+    startCommand: node index.js
+
+  # 3) Display UI (Frontend)
   - type: web
     name: weather-display
     env: node
     plan: free
     rootDir: display
-    buildCommand: npm ci --omit=dev
+    buildCommand: npm install
     startCommand: node index.js
     autoDeploy: true
-    healthCheckPath: /health
     envVars:
-      # ตัวอย่าง: ถ้า display ต้องรู้ URL ของ CRUD ให้ประกาศไว้เป็นตัวแปรนี้
-      - key: CRUD_BASE_URL
-        sync: false   # หลัง deploy ครั้งแรก ให้ใส่เป็น https://<weather-crud ของคุณ>.onrender.com
-
-  # 3) Fetcher เป็น Cron Job (แทน Background Worker)
-  - type: cron
-    name: weather-fetcher-cron
-    plan: free
-    rootDir: fetcher
-    buildCommand: npm ci --omit=dev
-    schedule: "*/5 * * * *"   # ทุก 5 นาที
-    command: node index.js
-    envVars:
-      # ให้ fetcher โพสต์เข้า CRUD ผ่าน URL สาธารณะ
-      - key: CRUD_BASE_URL
-        sync: false   # ใส่เป็น URL เดียวกับด้านบน
-      # ถ้า fetcher ใช้คีย์อื่น (เช่น พิกัด เมือง ฯลฯ) เพิ่มได้ที่นี่
+      - key: API_BASE_URL
+        value: https://weather-crud.onrender.com
