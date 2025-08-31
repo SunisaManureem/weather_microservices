@@ -1,4 +1,4 @@
-const API = '/api/weather';
+/*const API = '/api/weather';
 
 async function load() {
   const res = await fetch(API + '?limit=50');
@@ -24,3 +24,4 @@ async function load() {
 }
 load();
 setInterval(load, 60*1000);
+*/
