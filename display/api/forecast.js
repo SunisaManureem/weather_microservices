@@ -1,7 +1,7 @@
 // /display/api/forecast.js
 const LAT = process.env.LAT || "13.7563";
 const LON = process.env.LON || "100.5018";
-const TZ  = process.env.TZ  || "Asia/Bangkok";
+const TZ  = process.env.TIMEZONE || "Asia/Bangkok";
 const LOCATION = process.env.LOCATION || "Bangkok, TH";
 
 export default async function handler(req, res) {
