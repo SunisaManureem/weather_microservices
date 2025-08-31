@@ -1,21 +1,44 @@
-<!doctype html>
+<!doctype html> 
 <html lang="th">
 <head>
   <meta charset="utf-8" />
   <title>Realtime weather dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- ========== (สไตล์คงเดิมทั้งหมดของคุณ) ========== -->
   <style>
     :root{
       color-scheme: light dark;
-      --bg-start:#fff3e7; --bg-end:#f2efff; --ink:#0f172a; --muted:#6b7280; --border:#e6e3ef;
-      --glass:rgba(255,255,255,.78); --glass-strong:rgba(255,255,255,.9); --shadow:0 24px 60px rgba(17,24,39,.08), 0 4px 16px rgba(17,24,39,.06);
-      --accent:#7c3aed; --accent-weak:#ede9fe;
-      --sun:#ef4444; --mon:#facc15; --tue:#db2777; --wed:#22c55e; --thu:#f97316; --fri:#3b82f6; --sat:#8b5cf6;
-      --stat-bg:rgba(253,253,255,.92); --stat-border:#ece8f8;
-      --humid-bg:#ffe9f0; --humid-border:#ffd5e3; --press-bg:#eefaff; --press-border:#d7f3ff; --wind-bg:#f2ecff; --wind-border:#e6dbff;
+      /* ====== THEME: DAWN (Light) ====== */
+      --bg-start:#fff3e7;
+      --bg-end:#f2efff;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --border:#e6e3ef;
+      --glass:rgba(255,255,255,.78);
+      --glass-strong:rgba(255,255,255,.9);
+      --shadow:0 24px 60px rgba(17,24,39,.08), 0 4px 16px rgba(17,24,39,.06);
+      --accent:#7c3aed;
+      --accent-weak:#ede9fe;
+
+      /* === ปรับเฉพาะสีแถบหน้าวันตามที่ขอ === */
+      --sun:#ef4444;  /* อาทิตย์: แดง */
+      --mon:#facc15;  /* จันทร์: เหลือง */
+      --tue:#db2777;  /* อังคาร: ชมพู */
+      --wed:#22c55e;  /* พุธ: เขียว */
+      --thu:#f97316;  /* พฤหัส: ส้ม */
+      --fri:#3b82f6;  /* ศุกร์: ฟ้า */
+      --sat:#8b5cf6;  /* เสาร์: ม่วง */
+
+      --stat-bg:rgba(253,253,255,.92);
+      --stat-border:#ece8f8;
+
+      --humid-bg:#ffe9f0;   --humid-border:#ffd5e3;
+      --press-bg:#eefaff;   --press-border:#d7f3ff;
+      --wind-bg:#f2ecff;    --wind-border:#e6dbff;
+
       --radius:20px;
     }
+
+    /* ========= NIGHT ========= */
     html[data-theme="night"]{
       --bg-start:#0b1024; --bg-end:#1a1031; --ink:#e9e7ff; --muted:#b9b7d4; --border:#272344;
       --glass:rgba(22,16,45,.55); --glass-strong:rgba(22,16,45,.68);
@@ -25,8 +48,17 @@
     }
     html[data-theme="night"] .card h2{ color:#cfcdf0 }
     html[data-theme="night"] .stat h3{ color:#b5b2d9 }
-    *{ box-sizing:border-box } *,*::before,*::after{ min-width:0 }
-    html,body{ max-width:100%; overflow-x:hidden; height:auto; min-height:100% }
+
+    /* ================== Reset/Layout ================== */
+    *{ box-sizing:border-box }
+    *, *::before, *::after{ min-width:0 }
+
+    html, body{
+      max-width:100%;
+      overflow-x:hidden;
+      height:auto;
+      min-height:100%;
+    }
     body{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Thai", Arial, sans-serif;
       margin:0; line-height:1.5; color:var(--ink);
@@ -35,79 +67,193 @@
         radial-gradient(900px 500px at 10% 0%, rgba(186,165,255,.28), transparent 55%),
         radial-gradient(280px 220px at 20% 28%, rgba(255,255,255,.9), transparent 65%),
         linear-gradient(180deg, var(--bg-start), var(--bg-end));
-      min-height:100svh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+      min-height:100svh;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
     }
-    .sky{ position:fixed; inset:0; pointer-events:none; opacity:.26; filter:blur(2px) contrast(105%);
-      background:radial-gradient(180px 140px at 18% 20%, #fff, transparent 60%),
-                 radial-gradient(220px 160px at 78% 14%, #fff, transparent 60%),
-                 radial-gradient(160px 120px at 60% 28%, #fff, transparent 60%);
+
+    .sky{
+      position:fixed; inset:0; pointer-events:none; opacity:.26; filter:blur(2px) contrast(105%);
+      background:
+        radial-gradient(180px 140px at 18% 20%, #fff, transparent 60%),
+        radial-gradient(220px 160px at 78% 14%, #fff, transparent 60%),
+        radial-gradient(160px 120px at 60% 28%, #fff, transparent 60%);
       z-index:-1;
     }
-    .page{ width:100%; max-width:1200px; margin: clamp(16px, 3vw, 28px) auto clamp(24px, 4vw, 48px); padding: 0 12px; }
+
+    .page{
+      width:100%;
+      max-width:1200px;
+      margin: clamp(16px, 3vw, 28px) auto clamp(24px, 4vw, 48px);
+      padding: 0 12px;
+    }
+
     .topbar{
-      width:100%; display:flex; align-items:center; gap:clamp(8px,1.8vw,14px); flex-wrap:wrap;
+      width:100%;
+      display:flex; align-items:center; gap:clamp(8px,1.8vw,14px); flex-wrap:wrap;
       padding: clamp(10px, 1.8vw, 14px) clamp(12px, 2.2vw, 18px);
       border:1px solid var(--border); border-radius:calc(var(--radius) + 6px);
-      background:var(--glass-strong); backdrop-filter:saturate(140%) blur(10px); box-shadow:var(--shadow);
+      background:var(--glass-strong); backdrop-filter:saturate(140%) blur(10px);
+      box-shadow:var(--shadow);
       justify-content:center; text-align:center;
     }
-    h1{font-size:clamp(1.2rem, 3.2vw, 1.8rem); margin:0; font-weight:900; width:100%; display:flex; justify-content:center; gap:8px}
+    h1{font-size:clamp(1.2rem, 3.2vw, 1.8rem); margin:0; letter-spacing:.3px; font-weight:900; width:100%; display:flex; justify-content:center; gap:8px}
     #curLoc{opacity:.9}
     .live{display:inline-flex; align-items:center; gap:8px; font-weight:900; color:#16a34a}
     .dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 6px rgba(34,197,94,.18);animation:pulse 1.5s infinite}
     @keyframes pulse{0%{transform:scale(.9);opacity:.6}50%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.6}}
     #updated{color:var(--muted);font-size:.95rem}
     .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
     .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:rgba(255,255,255,.86)}
-    .seg button{ padding:6px 12px;border:0;background:transparent;cursor:pointer;font-weight:900;color:#3a3a52; white-space:nowrap }
-    .seg button.active{ background:linear-gradient(180deg, var(--accent-weak), #ffffff); color:var(--accent); }
+    .seg button{
+      padding:6px 12px;border:0;background:transparent;cursor:pointer;font-weight:900;color:#3a3a52; white-space:nowrap
+    }
+    .seg button.active{
+      background:linear-gradient(180deg, var(--accent-weak), #ffffff);
+      color:var(--accent);
+    }
     html[data-theme="night"] .seg{ background:rgba(18,14,40,.7) }
     .pill{border:1px solid var(--border); border-radius:999px; padding:8px 14px; background:#fff; cursor:pointer; font-weight:800}
     select{padding:8px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:700; max-width:100%}
+
     .grid{ display:grid; gap:22px; grid-template-columns: 1fr; width:100% }
     section, .grid, .big{ min-width:0 }
-    .card,.stat{ border:1px solid var(--border); border-radius:var(--radius); background:var(--glass); backdrop-filter:saturate(160%) blur(12px); box-shadow:var(--shadow); width:100% }
+
+    .card, .stat{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:var(--glass);
+      backdrop-filter:saturate(160%) blur(12px);
+      box-shadow:var(--shadow);
+      width:100%;
+    }
     .card{ padding: clamp(12px, 2.2vw, 20px); }
     .card h2{ margin:0 0 10px 0; font-size:clamp(1rem, 2.6vw, 1.08rem); color:#4b5563; display:flex; align-items:center; gap:8px; letter-spacing:.2px }
+
     .big{ display:flex; align-items:center; justify-content:center; gap:10px; margin:8px 0 12px; flex-direction:column }
     .temp{ font-size:clamp(3rem, 12vw, 5.6rem); font-weight:900; letter-spacing:.5px; line-height:1 }
     .icon{ font-size:clamp(2rem, 8vw, 3.2rem); filter:drop-shadow(0 6px 10px rgba(0,0,0,.08)) }
+
     .meta{ color:#3f3f55; display:grid; gap:6px; align-items:center; text-align:center }
     .meta small{ color:var(--muted) }
+
+    /* ===== การ์ดสถิติ ===== */
     .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:12px }
-    .stat{ background:var(--stat-bg); border-color:var(--stat-border); box-shadow:0 14px 32px rgba(15,23,42,.08); padding:14px; transition:transform .15s ease, box-shadow .15s ease }
-    .stats .stat:nth-child(1){ background:linear-gradient(180deg, var(--humid-bg), rgba(255,255,255,.9)); border-color:var(--humid-border); }
-    .stats .stat:nth-child(2){ background:linear-gradient(180deg, var(--press-bg), rgba(255,255,255,.9)); border-color:var(--press-border); }
-    .stats .stat:nth-child(3){ background:linear-gradient(180deg, var(--wind-bg), rgba(255,255,255,.9)); border-color:var(--wind-border); }
+    .stat{
+      background:var(--stat-bg);
+      border-color:var(--stat-border);
+      box-shadow:0 14px 32px rgba(15,23,42,.08);
+      padding:14px; transition:transform .15s ease, box-shadow .15s ease
+    }
+    .stats .stat:nth-child(1){
+      background:linear-gradient(180deg, var(--humid-bg), rgba(255,255,255,.9));
+      border-color:var(--humid-border);
+    }
+    .stats .stat:nth-child(2){
+      background:linear-gradient(180deg, var(--press-bg), rgba(255,255,255,.9));
+      border-color:var(--press-border);
+    }
+    .stats .stat:nth-child(3){
+      background:linear-gradient(180deg, var(--wind-bg), rgba(255,255,255,.9));
+      border-color:var(--wind-border);
+    }
     html[data-theme="night"] .stats .stat:nth-child(1),
     html[data-theme="night"] .stats .stat:nth-child(2),
-    html[data-theme="night"] .stats .stat:nth-child(3){ background:var(--stat-bg); border-color:var(--stat-border); }
+    html[data-theme="night"] .stats .stat:nth-child(3){
+      background:var(--stat-bg);
+      border-color:var(--stat-border);
+    }
     .stat:hover{ transform:translateY(-2px); box-shadow:0 22px 44px rgba(0,0,0,.12) }
     .stat h3{ margin:0; font-size:.95rem; color:#6b7280 }
     .stat .v{ font-size:clamp(1.18rem, 3.2vw, 1.48rem); font-weight:900; margin-top:8px }
+
+    /* ===== รายชั่วโมง ===== */
     .hourlyRow{ display:flex; gap:12px; overflow:auto; padding:8px 2px; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain }
-    .hourlyRow::-webkit-scrollbar{ height:8px } .hourlyRow::-webkit-scrollbar-thumb{ background:#d4d0e8; border-radius:999px }
-    .hcard{ flex:0 0 clamp(92px, 26vw, 112px); border:1px solid var(--stat-border); background:var(--stat-bg); border-radius:18px; padding:12px; box-shadow:var(--shadow); scroll-snap-align:start; transition:transform .15s ease, box-shadow .15s ease }
+    .hourlyRow::-webkit-scrollbar{ height:8px }
+    .hourlyRow::-webkit-scrollbar-thumb{ background:#d4d0e8; border-radius:999px }
+    .hcard{
+      flex:0 0 clamp(92px, 26vw, 112px);
+      border:1px solid var(--stat-border);
+      background:var(--stat-bg);
+      border-radius:18px; padding:12px;
+      box-shadow:var(--shadow); scroll-snap-align:start; transition:transform .15s ease, box-shadow .15s ease
+    }
     .hcard:hover{ transform:translateY(-3px); box-shadow:0 18px 36px rgba(15,23,42,.12) }
-    .hcard .t{ font-weight:900; color:var(--ink); font-size:.92rem; opacity:.9 } .hcard .i{ font-size:1.35rem; margin:8px 0 } .hcard .v{ font-weight:900; font-size:1.02rem }
+    .hcard .t{ font-weight:900; color:var(--ink); font-size:.92rem; opacity:.9 }
+    .hcard .i{ font-size:1.35rem; margin:8px 0 }
+    .hcard .v{ font-weight:900; font-size:1.02rem }
+
+    /* ===== รายสัปดาห์ (เฉพาะสีแถบใช้ currentColor จากด้านบน) ===== */
     .weekRow{ display:flex; flex-direction:column; gap:10px; }
-    .drow{ display:grid; grid-template-columns: auto auto 1fr auto; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--stat-border); background:var(--stat-bg); border-radius:16px; box-shadow:var(--shadow); transition:transform .15s ease, box-shadow .15s ease; position:relative }
+    .drow{
+      display:grid;
+      grid-template-columns: auto auto 1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border:1px solid var(--stat-border);
+      background:var(--stat-bg);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      transition:transform .15s ease, box-shadow .15s ease;
+      position:relative;
+    }
     .drow:hover{ transform:translateY(-2px); box-shadow:0 18px 36px rgba(15,23,42,.12) }
-    .drow::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; border-top-left-radius:16px; border-bottom-left-radius:16px; background:currentColor; opacity:.9 }
-    .drow.sun{ color:var(--sun) } .drow.mon{ color:var(--mon) } .drow.tue{ color:var(--tue) } .drow.wed{ color:var(--wed) } .drow.thu{ color:var(--thu) } .drow.fri{ color:var(--fri) } .drow.sat{ color:var(--sat) }
+    .drow::before{
+      content:"";
+      position:absolute; left:0; top:0; bottom:0; width:4px;
+      border-top-left-radius:16px; border-bottom-left-radius:16px;
+      background:currentColor; opacity:.9;
+    }
+    .drow.sun{ color:var(--sun) }
+    .drow.mon{ color:var(--mon) }
+    .drow.tue{ color:var(--tue) }
+    .drow.wed{ color:var(--wed) }
+    .drow.thu{ color:var(--thu) }
+    .drow.fri{ color:var(--fri) }
+    .drow.sat{ color:var(--sat) }
+
     .daycell{ display:flex; align-items:center; gap:10px; min-width:0; color:var(--ink) }
     .daycell .dname{ font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
     .daycell .i{ font-size:1.25rem; filter:drop-shadow(0 6px 10px rgba(0,0,0,.08)) }
+
     .barcell{ display:flex; align-items:center }
-    .barTrack{ position:relative; height:8px; width:100%; border-radius:999px; background:rgba(125,125,180,.18); overflow:hidden }
-    .barRange{ position:absolute; top:0; bottom:0; border-radius:999px; background:linear-gradient(90deg, var(--accent-weak), #fff); box-shadow: inset 0 0 0 1px rgba(124,58,237,.18) }
+    .barTrack{
+      position:relative; height:8px; width:100%;
+      border-radius:999px; background:rgba(125,125,180,.18); overflow:hidden;
+    }
+    .barRange{
+      position:absolute; top:0; bottom:0;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--accent-weak), #fff);
+      box-shadow: inset 0 0 0 1px rgba(124,58,237,.18);
+    }
     .temps{ display:flex; align-items:center; gap:10px; font-weight:900 }
-    .hi,.lo{ display:inline-block; padding:4px 8px; border-radius:999px; font-weight:900; border:1px solid var(--stat-border); background:#fff }
-    .hi{ color:#ef4444 } .lo{ color:#3b82f6 }
+    .hi, .lo{
+      display:inline-block; padding:4px 8px; border-radius:999px; font-weight:900;
+      border:1px solid var(--stat-border); background:#fff;
+    }
+    .hi{ color:#ef4444; }
+    .lo{ color:#3b82f6; }
+
     section .card + .card{ margin-top:14px }
-    @media (max-width:1024px){ .stats{ gap:12px } }
-    @media (max-width:768px){ .topbar{ flex-direction:column; align-items:stretch; gap:10px } .controls{ margin-left:0; width:100%; gap:8px; flex-wrap:wrap; justify-content:center } .stats{ grid-template-columns: repeat(2,1fr) } }
-    @media (max-width:480px){ .stats{ grid-template-columns:1fr } .hcard{ flex-basis: clamp(94px, 36vw, 110px) } .drow{ padding:10px 12px; border-radius:14px } .drow::before{ border-top-left-radius:14px; border-bottom-left-radius:14px } .daycell .dname{ max-width:7.6em } }
+
+    @media (max-width: 1024px){
+      .stats{ gap:12px; }
+    }
+    @media (max-width: 768px){
+      .topbar{ flex-direction: column; align-items: stretch; gap:10px; }
+      .controls{ margin-left:0; width:100%; gap:8px; flex-wrap:wrap; justify-content:center }
+      .stats{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px){
+      .stats{ grid-template-columns: 1fr; }
+      .hcard{ flex-basis: clamp(94px, 36vw, 110px); }
+      .drow{ padding:10px 12px; border-radius:14px }
+      .drow::before{ border-top-left-radius:14px; border-bottom-left-radius:14px }
+      .daycell .dname{ max-width: 7.6em; }
+    }
   </style>
 </head>
 <body>
@@ -123,10 +269,12 @@
           <button id="btnC" class="active">°C</button>
           <button id="btnF">°F</button>
         </div>
+
         <div class="seg mode">
           <button id="lightBtn" class="active">Light</button>
           <button id="nightBtn">Night</button>
         </div>
+
         <select id="autoSel">
           <option value="0">Auto: Off</option>
           <option value="30">Every 30s</option>
@@ -151,9 +299,18 @@
           </div>
 
           <div class="stats">
-            <div class="stat"><h3>ความชื้น</h3><div class="v" id="curHum">—</div></div>
-            <div class="stat"><h3>ความกดอากาศ</h3><div class="v" id="curPres">—</div></div>
-            <div class="stat"><h3>ความเร็วลม</h3><div class="v" id="curWindBlock">—</div></div>
+            <div class="stat">
+              <h3>ความชื้น</h3>
+              <div class="v" id="curHum">—</div>
+            </div>
+            <div class="stat">
+              <h3>ความกดอากาศ</h3>
+              <div class="v" id="curPres">—</div>
+            </div>
+            <div class="stat">
+              <h3>ความเร็วลม</h3>
+              <div class="v" id="curWindBlock">—</div>
+            </div>
           </div>
         </div>
 
@@ -171,20 +328,19 @@
   </div>
 
   <script>
-    /* === ตั้งค่าพิกัด/ที่อยู่ === */
-    const LAT = 13.7563, LON = 100.5018;
-    const LOCATION = 'Bangkok, TH';
-    const TZ = 'Asia/Bangkok';
-
-    /* ===== Utilities / State ===== */
+    /* ====== Utilities ====== */
     const CtoF = c => (c*9/5)+32;
     const fmt  = v => isFinite(v) ? (Math.round(v*10)/10).toFixed(1) : '—';
-    const state = { unit:'C', records:[], hourly:[], daily:[], location: LOCATION };
+
+    /* state */
+    const state = { unit:'C', records:[], hourly:[], daily:[], location:'' };
 
     /* Clock */
     const enDT = new Intl.DateTimeFormat('en-GB', {
-      timeZone: TZ, year: 'numeric', month: 'short', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: true
     });
     function startClock(){
       const el = document.getElementById('updated');
@@ -241,7 +397,9 @@
 
     const hh = ts => { const d=new Date(ts); const h=d.getHours(); const ampm=h<12?'AM':'PM'; const h12=(h%12)||12; return `${h12} ${ampm}`; };
 
+    /* ===== ปรับรายสัปดาห์: ตัวย่อวัน + ไอคอนหลังวัน ===== */
     const LOCALE = 'th-TH';
+    const TZ     = 'Asia/Bangkok';
     const dayFmt = new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, weekday: 'short' });
     const dayLabel = (dstr) => {
       const d = new Date(dstr.includes('T') ? dstr : `${dstr}T00:00:00Z`);
@@ -249,7 +407,7 @@
     };
     function weekdayClass(dateStr){
       const d = new Date(dateStr.includes('T')? dateStr : `${dateStr}T00:00:00`);
-      const w = d.getDay();
+      const w = d.getDay(); // 0=Sun ... 6=Sat
       return ['sun','mon','tue','wed','thu','fri','sat'][w];
     }
 
@@ -267,6 +425,7 @@
       });
     }
 
+    /* ===== รายสัปดาห์: ต่ำสุดซ้าย – เส้นกลาง – สูงสุดขวา ===== */
     function renderWeekly(){
       weekRow.innerHTML='';
       if(!state.daily.length){weekRow.innerHTML='<div class="muted">—</div>'; return;}
@@ -315,116 +474,66 @@
       while(state.records.length>60) state.records.shift();
     }
 
-    /* ====== เรียก Open-Meteo ตรง ๆ แทน /api/* ====== */
-    function buildCurrentURL(){
-      const params = new URLSearchParams({
-        latitude: LAT, longitude: LON, timezone: TZ,
-        current: 'temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,weather_code'
-      });
-      return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
-    }
-    function buildForecastURL(){
-      const params = new URLSearchParams({
-        latitude: LAT, longitude: LON, timezone: TZ,
-        hourly: 'temperature_2m,weather_code',
-        daily: 'temperature_2m_max,temperature_2m_min,weather_code'
-      });
-      return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
-    }
-
     async function loadCurrent(){
-      const r = await fetch(buildCurrentURL(), { cache: 'no-store' });
-      if(!r.ok) throw new Error('current failed');
-      const j = await r.json();
-
-      const c = j.current || {};
-      const data = {
-        time: c.time ? new Date(c.time).toISOString() : Date.now(),
-        temp: c.temperature_2m,
-        humidity: c.relative_humidity_2m,
-        pressure: c.pressure_msl,
-        wind: c.wind_speed_10m,
-        icon: c.weather_code,
-        source: 'Open-Meteo',
-        location: LOCATION
-      };
-      state.records = [];
+      const r=await fetch('/api/current',{cache:'no-store'}); if(!r.ok) throw new Error();
+      const data=await r.json();
+      if (data.location) state.location = data.location;
+      state.records=[]; 
       pushRecord(data);
       renderCurrent();
     }
 
     async function loadForecast(){
-      const r = await fetch(buildForecastURL(), { cache: 'no-store' });
-      if(!r.ok) throw new Error('forecast failed');
-      const j = await r.json();
-
-      // hourly
-      const h = (j.hourly && j.hourly.time) ? j.hourly.time.map((t,i)=>({
-        time: j.hourly.time[i],
-        temp: j.hourly.temperature_2m?.[i],
-        icon: j.hourly.weather_code?.[i]
-      })) : [];
-      state.hourly = h;
-
-      // daily
-      const d = (j.daily && j.daily.time) ? j.daily.time.map((t,i)=>({
-        date: j.daily.time[i],
-        min: j.daily.temperature_2m_min?.[i],
-        max: j.daily.temperature_2m_max?.[i],
-        icon: j.daily.weather_code?.[i]
-      })) : [];
-      state.daily = d;
-
-      renderHourly(); renderWeekly(); renderCurrent();
+      const r=await fetch('/api/forecast',{cache:'no-store'}); if(!r.ok) throw new Error();
+      const f=await r.json();
+      if (f.location) state.location = f.location;
+      state.hourly=(f.hourly||[]).map(x=>({time:x.time,temp:Number(x.temp),icon:x.icon}));
+      state.daily=(f.daily||[]).map(x=>({date:x.date,min:Number(x.min),max:Number(x.max),icon:x.icon}));
+      renderHourly(); renderWeekly();
+      renderCurrent();
     }
 
     async function withRetry(fn, tries=2, delay=300){
-      let err;
-      for(let i=0;i<tries;i++){
-        try{ return await fn(); }
-        catch(e){ err=e; await new Promise(r=>setTimeout(r, delay*(i+1))); }
-      }
+      let err; for(let i=0;i<tries;i++){ try{return await fn();} catch(e){err=e; await new Promise(r=>setTimeout(r,delay*(i+1)));} }
       throw err;
     }
 
-    // เปลี่ยนธีม/หน่วย อ้างอิงของเดิม
+    function connectSSE(){
+      const es=new EventSource('/events');
+      es.onmessage=ev=>{ try{ const d=JSON.parse(ev.data); if(!d) return; pushRecord(d); renderCurrent(); }catch{} };
+      es.addEventListener('hello',()=>{loadForecast().catch(()=>{})});
+      es.onopen=()=>{loadForecast().catch(()=>{})};
+    }
+
     document.getElementById('refreshBtn').addEventListener('click',()=>{ loadCurrent().catch(()=>{}); loadForecast().catch(()=>{}); });
     document.getElementById('autoSel').addEventListener('change',e=>{
       const sec=Number(e.target.value); if(window._pullTimer) clearInterval(window._pullTimer);
       if(sec>0) window._pullTimer=setInterval(()=>{ loadCurrent().catch(()=>{}); loadForecast().catch(()=>{}) },sec*1000);
     });
-    document.getElementById('btnC').addEventListener('click',()=>{
-      document.getElementById('btnC').classList.add('active');
-      document.getElementById('btnF').classList.remove('active');
-      state.unit='C'; renderCurrent(); renderHourly(); renderWeekly();
-    });
-    document.getElementById('btnF').addEventListener('click',()=>{
-      document.getElementById('btnF').classList.add('active');
-      document.getElementById('btnC').classList.remove('active');
-      state.unit='F'; renderCurrent(); renderHourly(); renderWeekly();
-    });
+    document.getElementById('btnC').addEventListener('click',()=>{ document.getElementById('btnC').classList.add('active'); document.getElementById('btnF').classList.remove('active'); state.unit='C'; renderCurrent(); renderHourly(); renderWeekly(); });
+    document.getElementById('btnF').addEventListener('click',()=>{ document.getElementById('btnF').classList.add('active'); document.getElementById('btnC').classList.remove('active'); state.unit='F'; renderCurrent(); renderHourly(); renderWeekly(); });
 
-    const THEME_KEY='theme';
+    const THEME_KEY = 'theme';
     function applyTheme(t){
-      const root=document.documentElement;
-      root.setAttribute('data-theme',t);
+      const root = document.documentElement;
+      root.setAttribute('data-theme', t);
       document.getElementById('lightBtn')?.classList.toggle('active', t==='light');
       document.getElementById('nightBtn')?.classList.toggle('active', t==='night');
-      try{ localStorage.setItem(THEME_KEY,t); }catch{}
+      try{ localStorage.setItem(THEME_KEY, t); }catch{}
     }
     (function initTheme(){
-      const saved=(()=>{ try{return localStorage.getItem(THEME_KEY);}catch{return null;} })();
-      const systemDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const saved = (()=>{ try{return localStorage.getItem(THEME_KEY);}catch{return null;} })();
+      const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       applyTheme(saved || (systemDark ? 'night' : 'light'));
-      document.getElementById('lightBtn')?.addEventListener('click',()=>applyTheme('light'));
-      document.getElementById('nightBtn')?.addEventListener('click',()=>applyTheme('night'));
+      document.getElementById('lightBtn')?.addEventListener('click', ()=>applyTheme('light'));
+      document.getElementById('nightBtn')?.addEventListener('click', ()=>applyTheme('night'));
     })();
 
     (async()=>{
       startClock();
       await withRetry(loadCurrent,2,400).catch(()=>{});
       await withRetry(loadForecast,2,500).catch(()=>{});
-      // ดึงทุก 60s
+      connectSSE();
       window._pullTimer=setInterval(()=>{ loadCurrent().catch(()=>{}); loadForecast().catch(()=>{}) },60*1000);
     })();
   </script>
