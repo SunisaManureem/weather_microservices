@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="th">
 <head>
   <meta charset="utf-8" />
@@ -7,65 +7,49 @@
   <style>
     :root{
       color-scheme: light dark;
-      /* ===== Palette (ปรับเฉพาะสี) ===== */
-      --bg-start:#eaf7ff;            /* ฟ้าพาสเทลสดใส */
-      --bg-end:#f3efff;              /* ไล่ม่วงอ่อน */
-      --ink:#0f172a; 
-      --muted:#64748b; 
-      --border:#e5e7eb;
+      /* ====== THEME: DAWN (Light) ====== */
+      --bg-start:#fff3e7;
+      --bg-end:#f2efff;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --border:#e6e3ef;
+      --glass:rgba(255,255,255,.78);
+      --glass-strong:rgba(255,255,255,.9);
+      --shadow:0 24px 60px rgba(17,24,39,.08), 0 4px 16px rgba(17,24,39,.06);
+      --accent:#7c3aed;
+      --accent-weak:#ede9fe;
 
-      /* แก้ว/แสง */
-      --glass:rgba(255,255,255,.75); 
-      --glass-strong:rgba(255,255,255,.86);
-      --shadow:0 20px 50px rgba(15,23,42,.08), 0 2px 10px rgba(15,23,42,.06);
+      /* === ปรับเฉพาะสีแถบหน้าวันตามที่ขอ === */
+      --sun:#ef4444;  /* อาทิตย์: แดง */
+      --mon:#facc15;  /* จันทร์: เหลือง */
+      --tue:#db2777;  /* อังคาร: ชมพู */
+      --wed:#22c55e;  /* พุธ: เขียว */
+      --thu:#f97316;  /* พฤหัส: ส้ม */
+      --fri:#3b82f6;  /* ศุกร์: ฟ้า */
+      --sat:#8b5cf6;  /* เสาร์: ม่วง */
 
-      /* แอ็กเซนต์ใหม่ (เขียวฟ้า) ให้ต่างจากเพื่อน */
-      --accent:#14b8a6;              /* teal-500 */
-      --accent-weak:#ccfbf1;         /* teal-100 */
+      --stat-bg:rgba(253,253,255,.92);
+      --stat-border:#ece8f8;
 
-      /* สีตามวัน (เส้นขอบรายสัปดาห์) */
-      --sun:#ef4444;   /* อาทิตย์ แดง */
-      --mon:#f59e0b;   /* จันทร์ เหลือง/อำพัน */
-      --tue:#ec4899;   /* อังคาร ชมพู */
-      --wed:#22c55e;   /* พุธ เขียว */
-      --thu:#fb923c;   /* พฤหัส ส้ม */
-      --fri:#3b82f6;   /* ศุกร์ ฟ้า */
-      --sat:#8b5cf6;   /* เสาร์ ม่วง */
+      --humid-bg:#ffe9f0;   --humid-border:#ffd5e3;
+      --press-bg:#eefaff;   --press-border:#d7f3ff;
+      --wind-bg:#f2ecff;    --wind-border:#e6dbff;
 
-      /* พื้นหลัง “ควันเทา” ของการ์ดค่าสถิติ (พื้นฐาน) */
-      --stat-bg:rgba(248,250,252,.92);   /* slate-50/90 */
-      --stat-border:#e2e8f0;             /* slate-200 */
-
-      /* สีพาสเทลเฉพาะการ์ดสถิติ (Light only) */
-      --humid-bg:#e0f2fe;   --humid-border:#bae6fd;  /* น้ำเงินฟ้าอ่อน */
-      --press-bg:#f3e8ff;   --press-border:#e9d5ff;  /* ม่วงอ่อน */
-      --wind-bg:#d1fae5;    --wind-border:#a7f3d0;   /* เขียวมิ้นต์ */
-      
-      --radius:18px;
+      --radius:20px;
     }
 
-    /* ========= Night theme (เฉพาะสี) ========= */
+    /* ========= NIGHT ========= */
     html[data-theme="night"]{
-      --bg-start:#0b1220;
-      --bg-end:#111827;
-      --ink:#e5e7eb;
-      --muted:#94a3b8;
-      --border:#1f2937;
-
-      --glass:rgba(17,24,39,.6);
-      --glass-strong:rgba(17,24,39,.72);
-      --shadow:0 20px 50px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.25);
-
-      --accent:#38bdf8;
-      --accent-weak:rgba(56,189,248,.14);
-
-      /* ควันเทาโทนกลางคืน (ใหม่) */
-      --stat-bg:rgba(31,41,55,.75);  /* slate-800/75 */
-      --stat-border:#334155;         /* slate-700 */
+      --bg-start:#0b1024; --bg-end:#1a1031; --ink:#e9e7ff; --muted:#b9b7d4; --border:#272344;
+      --glass:rgba(22,16,45,.55); --glass-strong:rgba(22,16,45,.68);
+      --shadow:0 26px 60px rgba(0,0,0,.45), 0 6px 18px rgba(0,0,0,.32);
+      --accent:#a3e635; --accent-weak:rgba(163,230,53,.16);
+      --stat-bg:rgba(29,22,54,.72); --stat-border:#2f2957;
     }
-    html[data-theme="night"] .card h2{ color:#cbd5e1 }
-    html[data-theme="night"] .stat h3{ color:#9ca3af }
+    html[data-theme="night"] .card h2{ color:#cfcdf0 }
+    html[data-theme="night"] .stat h3{ color:#b5b2d9 }
 
+    /* ================== Reset/Layout ================== */
     *{ box-sizing:border-box }
     *, *::before, *::after{ min-width:0 }
 
@@ -79,8 +63,9 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Thai", Arial, sans-serif;
       margin:0; line-height:1.5; color:var(--ink);
       background:
-        radial-gradient(900px 420px at 12% 8%, rgba(147,197,253,.35), transparent 60%),
-        radial-gradient(700px 360px at 90% 20%, rgba(196,181,253,.30), transparent 60%),
+        radial-gradient(1200px 520px at 85% -10%, rgba(255,188,143,.25), transparent 60%),
+        radial-gradient(900px 500px at 10% 0%, rgba(186,165,255,.28), transparent 55%),
+        radial-gradient(280px 220px at 20% 28%, rgba(255,255,255,.9), transparent 65%),
         linear-gradient(180deg, var(--bg-start), var(--bg-end));
       min-height:100svh;
       overflow-y:auto;
@@ -88,11 +73,11 @@
     }
 
     .sky{
-      position:fixed; inset:0; pointer-events:none; opacity:.30; filter:blur(2px);
+      position:fixed; inset:0; pointer-events:none; opacity:.26; filter:blur(2px) contrast(105%);
       background:
-        radial-gradient(140px 140px at 12% 18%, #fff, transparent 60%),
-        radial-gradient(180px 140px at 22% 15%, #fff, transparent 60%),
-        radial-gradient(220px 160px at 85% 18%, #fff, transparent 60%);
+        radial-gradient(180px 140px at 18% 20%, #fff, transparent 60%),
+        radial-gradient(220px 160px at 78% 14%, #fff, transparent 60%),
+        radial-gradient(160px 120px at 60% 28%, #fff, transparent 60%);
       z-index:-1;
     }
 
@@ -108,21 +93,29 @@
       display:flex; align-items:center; gap:clamp(8px,1.8vw,14px); flex-wrap:wrap;
       padding: clamp(10px, 1.8vw, 14px) clamp(12px, 2.2vw, 18px);
       border:1px solid var(--border); border-radius:calc(var(--radius) + 6px);
-      background:var(--glass-strong); backdrop-filter:saturate(140%) blur(8px);
+      background:var(--glass-strong); backdrop-filter:saturate(140%) blur(10px);
       box-shadow:var(--shadow);
+      justify-content:center; text-align:center;
     }
-    h1{font-size:clamp(1.2rem, 3.2vw, 1.8rem); margin:0; letter-spacing:.3px; font-weight:800}
-    #curLoc{opacity:.85}
-    .live{display:inline-flex; align-items:center; gap:8px; font-weight:800; color:#16a34a; margin-left:4px}
-    .dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 6px rgba(34,197,94,.15);animation:pulse 1.5s infinite}
+    h1{font-size:clamp(1.2rem, 3.2vw, 1.8rem); margin:0; letter-spacing:.3px; font-weight:900; width:100%; display:flex; justify-content:center; gap:8px}
+    #curLoc{opacity:.9}
+    .live{display:inline-flex; align-items:center; gap:8px; font-weight:900; color:#16a34a}
+    .dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 6px rgba(34,197,94,.18);animation:pulse 1.5s infinite}
     @keyframes pulse{0%{transform:scale(.9);opacity:.6}50%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.6}}
     #updated{color:var(--muted);font-size:.95rem}
-    .controls{display:flex; gap:10px; align-items:center; margin-left:auto; flex-wrap:wrap}
-    .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:#fff}
-    .seg button{padding:6px 12px;border:0;background:transparent;cursor:pointer;font-weight:800;color:#334155; white-space:nowrap}
-    .seg button.active{background:var(--accent-weak); color:var(--accent)}
-    .pill{border:1px solid var(--border); border-radius:999px; padding:8px 14px; background:#fff; cursor:pointer; font-weight:700}
-    select{padding:8px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:600; max-width:100%}
+    .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+    .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:rgba(255,255,255,.86)}
+    .seg button{
+      padding:6px 12px;border:0;background:transparent;cursor:pointer;font-weight:900;color:#3a3a52; white-space:nowrap
+    }
+    .seg button.active{
+      background:linear-gradient(180deg, var(--accent-weak), #ffffff);
+      color:var(--accent);
+    }
+    html[data-theme="night"] .seg{ background:rgba(18,14,40,.7) }
+    .pill{border:1px solid var(--border); border-radius:999px; padding:8px 14px; background:#fff; cursor:pointer; font-weight:800}
+    select{padding:8px 12px; border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:700; max-width:100%}
 
     .grid{ display:grid; gap:22px; grid-template-columns: 1fr; width:100% }
     section, .grid, .big{ min-width:0 }
@@ -131,89 +124,118 @@
       border:1px solid var(--border);
       border-radius:var(--radius);
       background:var(--glass);
-      backdrop-filter:saturate(160%) blur(10px);
+      backdrop-filter:saturate(160%) blur(12px);
       box-shadow:var(--shadow);
       width:100%;
     }
     .card{ padding: clamp(12px, 2.2vw, 20px); }
-    .card h2{ margin:0 0 10px 0; font-size:clamp(1rem, 2.6vw, 1.08rem); color:#334155; display:flex; align-items:center; gap:8px; letter-spacing:.2px }
+    .card h2{ margin:0 0 10px 0; font-size:clamp(1rem, 2.6vw, 1.08rem); color:#4b5563; display:flex; align-items:center; gap:8px; letter-spacing:.2px }
 
-    .big{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin:10px 0 16px; }
-    .temp{ font-size:clamp(2.2rem, 6.2vw, 3.8rem); font-weight:900; letter-spacing:.5px }
-    .icon{ font-size:clamp(1.6rem, 4.6vw, 2.3rem); filter:drop-shadow(0 6px 10px rgba(0,0,0,.08)) }
+    .big{ display:flex; align-items:center; justify-content:center; gap:10px; margin:8px 0 12px; flex-direction:column }
+    .temp{ font-size:clamp(3rem, 12vw, 5.6rem); font-weight:900; letter-spacing:.5px; line-height:1 }
+    .icon{ font-size:clamp(2rem, 8vw, 3.2rem); filter:drop-shadow(0 6px 10px rgba(0,0,0,.08)) }
 
-    .meta{ color:#334155; display:grid; gap:6px }
+    .meta{ color:#3f3f55; display:grid; gap:6px; align-items:center; text-align:center }
     .meta small{ color:var(--muted) }
 
-    /* ===== “การ์ดสถิติ” ===== */
-    .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:14px }
+    /* ===== การ์ดสถิติ ===== */
+    .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:12px }
     .stat{
-      background:var(--stat-bg);            /* พื้นฐาน */
+      background:var(--stat-bg);
       border-color:var(--stat-border);
-      box-shadow:0 10px 24px rgba(0,0,0,.08);
+      box-shadow:0 14px 32px rgba(15,23,42,.08);
       padding:14px; transition:transform .15s ease, box-shadow .15s ease
     }
-    /* เติมสีในโหมด Light เฉพาะสามใบนี้ (ความชื้น/กดอากาศ/ลม) */
     .stats .stat:nth-child(1){
-      background:linear-gradient(180deg, var(--humid-bg), rgba(255,255,255,.86));
+      background:linear-gradient(180deg, var(--humid-bg), rgba(255,255,255,.9));
       border-color:var(--humid-border);
     }
     .stats .stat:nth-child(2){
-      background:linear-gradient(180deg, var(--press-bg), rgba(255,255,255,.86));
+      background:linear-gradient(180deg, var(--press-bg), rgba(255,255,255,.9));
       border-color:var(--press-border);
     }
     .stats .stat:nth-child(3){
-      background:linear-gradient(180deg, var(--wind-bg), rgba(255,255,255,.86));
+      background:linear-gradient(180deg, var(--wind-bg), rgba(255,255,255,.9));
       border-color:var(--wind-border);
     }
-    /* ในโหมด Night ให้กลับเป็นควันเทา (อ่านสบาย) */
     html[data-theme="night"] .stats .stat:nth-child(1),
     html[data-theme="night"] .stats .stat:nth-child(2),
     html[data-theme="night"] .stats .stat:nth-child(3){
       background:var(--stat-bg);
       border-color:var(--stat-border);
     }
-
-    .stat:hover{ transform:translateY(-2px); box-shadow:0 18px 36px rgba(0,0,0,.12) }
+    .stat:hover{ transform:translateY(-2px); box-shadow:0 22px 44px rgba(0,0,0,.12) }
     .stat h3{ margin:0; font-size:.95rem; color:#6b7280 }
-    .stat .v{ font-size:clamp(1.2rem, 3.2vw, 1.55rem); font-weight:900; margin-top:8px }
+    .stat .v{ font-size:clamp(1.18rem, 3.2vw, 1.48rem); font-weight:900; margin-top:8px }
 
-    .hourlyRow{
-      display:flex; gap:14px; overflow:auto; padding:6px 2px; scroll-snap-type:x proximity;
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior-x: contain;
-    }
+    /* ===== รายชั่วโมง ===== */
+    .hourlyRow{ display:flex; gap:12px; overflow:auto; padding:8px 2px; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain }
     .hourlyRow::-webkit-scrollbar{ height:8px }
-    .hourlyRow::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:999px }
+    .hourlyRow::-webkit-scrollbar-thumb{ background:#d4d0e8; border-radius:999px }
     .hcard{
-      flex:0 0 clamp(90px, 26vw, 108px);
+      flex:0 0 clamp(92px, 26vw, 112px);
       border:1px solid var(--stat-border);
       background:var(--stat-bg);
-      border-radius:14px; padding:clamp(10px, 2.2vw, 12px);
+      border-radius:18px; padding:12px;
       box-shadow:var(--shadow); scroll-snap-align:start; transition:transform .15s ease, box-shadow .15s ease
     }
-    .hcard:hover{ transform:translateY(-3px); box-shadow:0 16px 36px rgba(15,23,42,.12) }
-    .hcard .t{ font-weight:900; color:var(--ink); font-size:.92rem }
-    .hcard .i{ font-size:1.25rem; margin:8px 0 }
+    .hcard:hover{ transform:translateY(-3px); box-shadow:0 18px 36px rgba(15,23,42,.12) }
+    .hcard .t{ font-weight:900; color:var(--ink); font-size:.92rem; opacity:.9 }
+    .hcard .i{ font-size:1.35rem; margin:8px 0 }
     .hcard .v{ font-weight:900; font-size:1.02rem }
 
-    .weekRow{ display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 42vw, 180px), 1fr)) }
-    .dchip{
-      padding:12px; border-radius:16px; background:var(--stat-bg); border:2px solid var(--stat-border);
-      box-shadow:var(--shadow); transition:transform .15s ease, box-shadow .15s ease
+    /* ===== รายสัปดาห์ (เฉพาะสีแถบใช้ currentColor จากด้านบน) ===== */
+    .weekRow{ display:flex; flex-direction:column; gap:10px; }
+    .drow{
+      display:grid;
+      grid-template-columns: auto auto 1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border:1px solid var(--stat-border);
+      background:var(--stat-bg);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      transition:transform .15s ease, box-shadow .15s ease;
+      position:relative;
     }
-    .dchip:hover{ transform:translateY(-3px); box-shadow:0 18px 40px rgba(15,23,42,.12) }
-    .dchip .head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; color:var(--ink) }
-    .dchip .range{ font-weight:900; font-size:1.02rem }
+    .drow:hover{ transform:translateY(-2px); box-shadow:0 18px 36px rgba(15,23,42,.12) }
+    .drow::before{
+      content:"";
+      position:absolute; left:0; top:0; bottom:0; width:4px;
+      border-top-left-radius:16px; border-bottom-left-radius:16px;
+      background:currentColor; opacity:.9;
+    }
+    .drow.sun{ color:var(--sun) }
+    .drow.mon{ color:var(--mon) }
+    .drow.tue{ color:var(--tue) }
+    .drow.wed{ color:var(--wed) }
+    .drow.thu{ color:var(--thu) }
+    .drow.fri{ color:var(--fri) }
+    .drow.sat{ color:var(--sat) }
 
-    /* สีกรอบตามวัน */
-    .sun{ border-color:var(--sun) }
-    .mon{ border-color:var(--mon) }
-    .tue{ border-color:var(--tue) }
-    .wed{ border-color:var(--wed) }
-    .thu{ border-color:var(--thu) }
-    .fri{ border-color:var(--fri) }
-    .sat{ border-color:var(--sat) }
+    .daycell{ display:flex; align-items:center; gap:10px; min-width:0; color:var(--ink) }
+    .daycell .dname{ font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .daycell .i{ font-size:1.25rem; filter:drop-shadow(0 6px 10px rgba(0,0,0,.08)) }
+
+    .barcell{ display:flex; align-items:center }
+    .barTrack{
+      position:relative; height:8px; width:100%;
+      border-radius:999px; background:rgba(125,125,180,.18); overflow:hidden;
+    }
+    .barRange{
+      position:absolute; top:0; bottom:0;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--accent-weak), #fff);
+      box-shadow: inset 0 0 0 1px rgba(124,58,237,.18);
+    }
+    .temps{ display:flex; align-items:center; gap:10px; font-weight:900 }
+    .hi, .lo{
+      display:inline-block; padding:4px 8px; border-radius:999px; font-weight:900;
+      border:1px solid var(--stat-border); background:#fff;
+    }
+    .hi{ color:#ef4444; }
+    .lo{ color:#3b82f6; }
 
     section .card + .card{ margin-top:14px }
 
@@ -222,15 +244,15 @@
     }
     @media (max-width: 768px){
       .topbar{ flex-direction: column; align-items: stretch; gap:10px; }
-      .controls{ margin-left:0; width:100%; gap:8px; flex-wrap:wrap }
+      .controls{ margin-left:0; width:100%; gap:8px; flex-wrap:wrap; justify-content:center }
       .stats{ grid-template-columns: repeat(2, 1fr); }
-      .weekRow{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
     @media (max-width: 480px){
       .stats{ grid-template-columns: 1fr; }
-      .hcard{ flex-basis: clamp(88px, 38vw, 100px); }
-      .weekRow{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
-      .dchip{ padding:10px; border-radius:14px; }
+      .hcard{ flex-basis: clamp(94px, 36vw, 110px); }
+      .drow{ padding:10px 12px; border-radius:14px }
+      .drow::before{ border-top-left-radius:14px; border-bottom-left-radius:14px }
+      .daycell .dname{ max-width: 7.6em; }
     }
   </style>
 </head>
@@ -248,7 +270,6 @@
           <button id="btnF">°F</button>
         </div>
 
-        <!-- สวิตช์ธีม -->
         <div class="seg mode">
           <button id="lightBtn" class="active">Light</button>
           <button id="nightBtn">Night</button>
@@ -311,10 +332,10 @@
     const CtoF = c => (c*9/5)+32;
     const fmt  = v => isFinite(v) ? (Math.round(v*10)/10).toFixed(1) : '—';
 
-    /* เพิ่ม location ลง state เพื่อให้แสดงคงที่ */
+    /* state */
     const state = { unit:'C', records:[], hourly:[], daily:[], location:'' };
 
-    /* English date+time in Asia/Bangkok, live seconds */
+    /* Clock */
     const enDT = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Asia/Bangkok',
       year: 'numeric', month: 'short', day: '2-digit',
@@ -371,14 +392,19 @@
       curPresEl.textContent = latest.pressure != null ? `${fmt(latest.pressure)} hPa` : '—';
       curWindBlockEl.textContent = latest.wind != null ? `${fmt(latest.wind)} km/h` : '—';
       wxIconEl.textContent  = iconEmoji(latest.icon);
-      /* ใช้ state.location เสมอ ไม่ให้ชื่อเมืองหาย */
       curLocEl.textContent  = state.location || '';
     }
 
     const hh = ts => { const d=new Date(ts); const h=d.getHours(); const ampm=h<12?'AM':'PM'; const h12=(h%12)||12; return `${h12} ${ampm}`; };
-    const dayLabel = dstr => { const d=new Date(dstr.includes('T')? dstr : `${dstr}T00:00:00`); return d.toLocaleDateString(undefined,{weekday:'short',day:'2-digit',month:'short'}); };
 
-    /* แปลงวันที่ -> class สีตามวัน */
+    /* ===== ปรับรายสัปดาห์: ตัวย่อวัน + ไอคอนหลังวัน ===== */
+    const LOCALE = 'th-TH';
+    const TZ     = 'Asia/Bangkok';
+    const dayFmt = new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, weekday: 'short' });
+    const dayLabel = (dstr) => {
+      const d = new Date(dstr.includes('T') ? dstr : `${dstr}T00:00:00Z`);
+      return dayFmt.format(d);
+    };
     function weekdayClass(dateStr){
       const d = new Date(dateStr.includes('T')? dateStr : `${dateStr}T00:00:00`);
       const w = d.getDay(); // 0=Sun ... 6=Sat
@@ -399,24 +425,46 @@
       });
     }
 
+    /* ===== รายสัปดาห์: ต่ำสุดซ้าย – เส้นกลาง – สูงสุดขวา ===== */
     function renderWeekly(){
       weekRow.innerHTML='';
       if(!state.daily.length){weekRow.innerHTML='<div class="muted">—</div>'; return;}
+
+      const conv = (x)=> state.unit==='C' ? x : CtoF(x);
+      const mins = state.daily.slice(0,7).map(d=>conv(d.min));
+      const maxs = state.daily.slice(0,7).map(d=>conv(d.max));
+      const gMin = Math.min(...mins);
+      const gMax = Math.max(...maxs);
+      const span = (gMax - gMin) || 1;
+
       state.daily.slice(0,7).forEach(d=>{
-        const min = state.unit==='C' ? d.min : CtoF(d.min);
-        const max = state.unit==='C' ? d.max : CtoF(d.max);
-        const chip=document.createElement('div');
-        chip.className=`dchip ${weekdayClass(d.date)}`;
-        chip.innerHTML=`<div class="head"><span>${dayLabel(d.date)}</span><span style="font-size:1.2rem">${iconEmoji(d.icon)}</span></div>
-                        <div class="range">${fmt(min)}° ~ ${fmt(max)}°</div>`;
-        weekRow.appendChild(chip);
+        const min = conv(d.min);
+        const max = conv(d.max);
+        const cls = weekdayClass(d.date);
+        const leftPct  = ((min - gMin) / span) * 100;
+        const rightPct = ((max - gMin) / span) * 100;
+
+        const row=document.createElement('div');
+        row.className=`drow ${cls}`;
+        row.innerHTML = `
+          <div class="daycell">
+            <span class="dname">${dayLabel(d.date)}</span>
+            <span class="i">${iconEmoji(d.icon)}</span>
+          </div>
+          <span class="lo">${fmt(min)}°</span>
+          <div class="barcell">
+            <div class="barTrack">
+              <div class="barRange" style="left:${leftPct}%; width:${Math.max(3, rightPct-leftPct)}%"></div>
+            </div>
+          </div>
+          <span class="hi">${fmt(max)}°</span>`;
+        weekRow.appendChild(row);
       });
     }
 
     function pushRecord(d){
       let ts=d.time ?? d.timestamp;
       if(typeof ts==='number'){ if(ts<1e12) ts*=1000; ts=new Date(ts).toISOString(); }
-      /* อัปเดต location ใน state เฉพาะเมื่อ payload มีค่า */
       if (d.location) state.location = d.location;
       state.records.push({
         time:ts, temp:Number(d.temp), wind:Number(d.wind), source:d.source||'',
@@ -429,7 +477,6 @@
     async function loadCurrent(){
       const r=await fetch('/api/current',{cache:'no-store'}); if(!r.ok) throw new Error();
       const data=await r.json();
-      /* เก็บ location ถ้ามี แล้วค่อยรีเซ็ต records */
       if (data.location) state.location = data.location;
       state.records=[]; 
       pushRecord(data);
@@ -439,12 +486,10 @@
     async function loadForecast(){
       const r=await fetch('/api/forecast',{cache:'no-store'}); if(!r.ok) throw new Error();
       const f=await r.json();
-      /* ถ้า forecast บอก location ก็จำไว้ด้วย กันชื่อเมืองว่าง */
       if (f.location) state.location = f.location;
       state.hourly=(f.hourly||[]).map(x=>({time:x.time,temp:Number(x.temp),icon:x.icon}));
       state.daily=(f.daily||[]).map(x=>({date:x.date,min:Number(x.min),max:Number(x.max),icon:x.icon}));
       renderHourly(); renderWeekly();
-      /* เผื่อครั้งแรกยังไม่ได้ current ให้โชว์ชื่อเมืองจาก forecast ทันที */
       renderCurrent();
     }
 
@@ -468,7 +513,6 @@
     document.getElementById('btnC').addEventListener('click',()=>{ document.getElementById('btnC').classList.add('active'); document.getElementById('btnF').classList.remove('active'); state.unit='C'; renderCurrent(); renderHourly(); renderWeekly(); });
     document.getElementById('btnF').addEventListener('click',()=>{ document.getElementById('btnF').classList.add('active'); document.getElementById('btnC').classList.remove('active'); state.unit='F'; renderCurrent(); renderHourly(); renderWeekly(); });
 
-    /* ==== Theme toggle (Light / Night) – สีเท่านั้น ==== */
     const THEME_KEY = 'theme';
     function applyTheme(t){
       const root = document.documentElement;
